@@ -4,17 +4,19 @@ import tensorflow as tf
 import os
 from dotenv import load_dotenv
 from pipeline.custom_loss import asymmetric_huber
-from pipeline.inference import make_input_sequence
+from pipeline.inference import make_input_seq
 
 load_dotenv()
+
 model = tf.keras.models.load_model("./models/FinalModel.keras", custom_objects={"asymmetric_huber": asymmetric_huber}
 )
+
 df = pd.read_csv("./database/sample.csv")
 
 PRED_RANGE_TO_STEPS = {
-    "24h_hourly": (24 * 4),
-    "7d_daily": (7 * 24 * 4),
-    "30d_monthly": (30 * 24 * 4)
+    "24h_hourly": (24 * 12),
+    "7d_daily": (7 * 24 * 12),
+    "30d_monthly": (30 * 24 * 12)
 }
 
 app = Flask(__name__)
@@ -40,6 +42,26 @@ def main():
     return render_template('main.html')
 
 @app.route('/forecast', methods=['GET', 'POST'])
+# def forecast():
+#     if request.method == 'POST':
+#         device_type = request.form['device_type']
+#         pred_range = request.form['prediction_range']
+        
+#         print(f"Device: {device_type}, Range: {pred_range}")
+
+#         n_steps = PRED_RANGE_TO_STEPS[pred_range]
+        
+#         X, time_idx = make_input_sequence(df, home_id=session['home_id'], device_type=device_type,
+#         n_steps=n_steps)
+#         y_pred = model.predict(X)
+#         print(y_pred)
+
+#         time_list = pd.Series(time_idx).dt.strftime("%Y-%m-%d %H:%M").tolist()
+#         y_list = y_pred.flatten().tolist()
+
+#         pred_time_pairs = list(zip(time_list, y_list))
+#         print(pred_time_pairs)
+#         return render_template("main.html", predictions=pred_time_pairs)
 def forecast():
     if request.method == 'POST':
         device_type = request.form['device_type']
@@ -49,8 +71,9 @@ def forecast():
 
         n_steps = PRED_RANGE_TO_STEPS[pred_range]
         
-        X, time_idx = make_input_sequence(df, home_id=session['home_id'], device_type=device_type,
+        X, time_idx = make_input_seq(df, home_id=session['home_id'], device_type=device_type,
         n_steps=n_steps)
+
         y_pred = model.predict(X)
         print(y_pred)
 
@@ -60,7 +83,6 @@ def forecast():
         pred_time_pairs = list(zip(time_list, y_list))
         print(pred_time_pairs)
         return render_template("main.html", predictions=pred_time_pairs)
-
 
 
 if __name__ == '__main__':

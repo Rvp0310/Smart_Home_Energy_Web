@@ -1,6 +1,6 @@
 import pandas as pd
 
-def generate_future_timestamps(n_steps, freq="15min"):
+def generate_future_timestamps(n_steps, freq):
     start = pd.Timestamp.now().floor(freq)
     return pd.date_range(
         start=start,
