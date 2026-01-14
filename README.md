@@ -4,6 +4,13 @@ A Flask-based web application that predicts **future energy consumption** for sm
 
 ---
 
+
+## Demo
+
+[![Preview Video](./static/preview/smart_home_energy_demo.gif)](./static/preview/smart_home_energy_demo.mp4)
+
+---
+
 ## 🚀 What This Does
 
 - Predicts **energy usage over time** for a selected smart device  
@@ -50,8 +57,44 @@ A Flask-based web application that predicts **future energy consumption** for sm
 ---
 
 ## 📁 Project Structure
-**pending**
-
+WEB/   
+├─ .venv/   
+├─ database/   
+│  └─ sample.csv   
+├─ models/   
+│  └─ FinalModel.keras   
+├─ node_modules/   
+├─ pipeline/   
+│  ├─ __pycache__/   
+│  ├─ artifacts/   
+│  │  ├─ feature_order.joblib   
+│  │  ├─ scaler.joblib   
+│  │  └─ ohe.joblib   
+│  ├─ aggregation.py   
+│  ├─ custom_loss.py   
+│  ├─ inference.py   
+│  └─ preprocess.py   
+├─ static/   
+│  ├─ css/   
+│  │  └─ styles.css   
+│  ├─ js/   
+│  │  └─ chart.js   
+│  ├─ preview/           # demo video and GIF   
+│  └─ favicon.jpg   
+├─ templates/   
+│  ├─ index.html   
+│  └─ main.html   
+├─ utils/   
+│  ├─ __pycache__/   
+│  ├─ helpers.py   
+│  └─ smart_tip.py   
+├─ .env   
+├─ .gitignore   
+├─ app.py    
+├─ package.json   
+├─ package-lock.json   
+├─ README.md   
+└─ requirements.txt   
 
 ---
 
@@ -95,4 +138,4 @@ All features are **forced to match training dtypes** during inference.
    - Applies saved encoders and scalers
    - Reshapes into `(1, n_steps, features)`
 3. Model predicts energy consumption
-4. Results displayed as: (charts coming soon)
+4. Results displayed in a dashboard form.

@@ -1,7 +1,10 @@
 import pandas as pd
 
+df = pd.read_csv("./database/sample.csv")
+df["timestamp"] = pd.to_datetime(df["timestamp"])
+
 def generate_future_timestamps(n_steps, freq):
-    start = pd.Timestamp.now().floor(freq)
+    start = df["timestamp"].max() + pd.tseries.frequencies.to_offset(freq)
     return pd.date_range(
         start=start,
         periods=n_steps,

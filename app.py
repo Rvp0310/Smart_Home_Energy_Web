@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, session, jsonify
+from flask import Flask, render_template, request, session
 import pandas as pd
 import tensorflow as tf
 import os
 from dotenv import load_dotenv
 from pipeline.custom_loss import asymmetric_huber
 from pipeline.inference import make_input_seq
+from pipeline.aggregation import aggregate_predictions
+from utils.smart_tip import generate_smart_tip
 
 load_dotenv()
 
@@ -17,6 +19,12 @@ PRED_RANGE_TO_STEPS = {
     "24h_hourly": (24 * 4),
     "7d_daily": (7 * 24 * 4),
     "30d_monthly": (30 * 24 * 4)
+}
+
+AGG_MAP = {
+    "24h_hourly": ["hourly"],
+    "7d_daily": ["daily"],
+    "30d_monthly": ["daily", "weekly"]
 }
 
 app = Flask(__name__)
@@ -43,25 +51,62 @@ def main():
 @app.route('/forecast', methods=['GET', 'POST'])
 def forecast():
     if request.method == 'POST':
-        device_type = request.form['device_type']
+        device_types = request.form.getlist('device_type[]')
         pred_range = request.form['prediction_range']
         
-        print(f"Device: {device_type}, Range: {pred_range}")
+        print(f"Device: {device_types}, Range: {pred_range}")
 
         n_steps = PRED_RANGE_TO_STEPS[pred_range]
         
-        X = make_input_seq(df, home_id=session['home_id'], device_type=device_type,
+        X = make_input_seq(df, home_id=session['home_id'], device_types=device_types,
         n_steps=n_steps)
 
-        y_pred = model.predict(X)
-        print(y_pred)
+        y_pred = model.predict(X).flatten()
 
-        # time_list = pd.Series(time_idx).dt.strftime("%Y-%m-%d %H:%M").tolist()
-        y_list = y_pred.flatten().tolist()
+        pred_by_device = {}
 
-        # pred_time_pairs = list(zip(time_list, y_list))
-        # print(pred_time_pairs)
-        return render_template("main.html", predictions=y_list)
+        idx = 0
+        for device in device_types:
+            pred_by_device[device] = y_pred[idx: idx + n_steps].tolist()
+            idx += n_steps
+
+        agg_modes = AGG_MAP[pred_range]
+        series = {}
+
+        for device, preds in pred_by_device.items():
+            series[device] = {}
+
+            for mode in agg_modes:
+                series[device][mode] = aggregate_predictions(preds, mode).tolist()
+
+
+        per_device_totals = {
+            device: sum(preds)
+            for device, preds in pred_by_device.items()
+        }
+
+        total_energy = sum(per_device_totals.values())
+
+        print()
+        print()
+        print(per_device_totals)
+        print()
+        print()
+
+        dashboard = {
+            "metadata": {
+                "devices": device_types,
+                "range": pred_range
+            },
+            "kpis":{
+                "total_energy": round(total_energy, 2),
+                "per_device": per_device_totals
+            },
+            "series": series,
+            "smartTip": generate_smart_tip(per_device_totals)
+        }
+
+        return render_template("main.html", dashboard=dashboard)
 
 
 if __name__ == '__main__':
