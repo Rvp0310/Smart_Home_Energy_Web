@@ -18,7 +18,7 @@ SMART_TIPS = {
     "ac_high": {
         "title": "AC Usage Alert",
         "messages": [
-            "AC is the major energy driver today. Setting it to 24–26°C can cut consumption by ~10–15%."
+            "AC is the major energy driver. Setting it to 24–26°C can cut consumption by ~10–15%."
         ]
     },
     "overall_high": {
