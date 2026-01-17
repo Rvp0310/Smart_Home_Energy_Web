@@ -12,7 +12,8 @@
 </head>
 
 <body>
-  <h3>Forecast For...</h3>
+  <a href="/history-dashboard" class="btn btn-secondary mt-1 mb-5" tabindex="-1" role="button">Go to User Dashboard</a>
+  <h3>Forecast For...</h3> 
 
   <form action="/forecast" method="post" class="forecast-form">
     <section class="forecast-input">
@@ -39,12 +40,12 @@
 
       <!-- forecast range -->
       <div class="container">
-        <label for="prediction_range">Prediction Range:</label>
+        <label for="prediction_range">for next:</label>
         <select name="prediction_range" class="form-select forecast-select" required>
           <option value="" selected disabled>Time Range</option>
-          <option value="24h_hourly">Next 24 Hours (Hourly)</option>
-          <option value="7d_daily">Next 7 Days (Daily)</option>
-          <option value="30d_monthly">Next 30 Days (Monthly)</option>
+          <option value="day_range">24 Hours</option>
+          <option value="week_range">7 Days</option>
+          <option value="month_range">30 Days</option>
         </select>
       </div>
     </section>
@@ -74,7 +75,7 @@
     </div>
     <div class="chart-space">
       <div id="lineChartDaily" style="height:400px; width: 100%;"></div>
-      {% if dashboard.metadata.range == "30d_monthly" %}
+      {% if dashboard.metadata.range == "month_range" %}
         <div id="weeklyChart" style="height:400px; width: 100%;"></div>
       {% endif %}
     </div>
@@ -84,6 +85,7 @@
   {% else %}
     <h3>No predictions yet</h3>
   {% endif %}
+  <hr>
 
   <!-- alert if no device picked -->
   <script>

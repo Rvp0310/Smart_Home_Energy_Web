@@ -63,7 +63,7 @@ function renderLineChart(series, range, containerId) {
   const traces = [];
   for (const device in series) {
     const modeData =
-      range === "24h_hourly" ? series[device].hourly :
+      range === "day_range" ? series[device].hourly :
       series[device].daily;
 
     traces.push({
@@ -110,7 +110,7 @@ function renderDashboard(dashboard) {
   renderDonut(dashboard.kpis.per_device, dashboard.kpis.total_energy);
   renderLineChart(dashboard.series, dashboard.metadata.range, "lineChartDaily");
 
-  if (dashboard.metadata.range === "30d_monthly") {
+  if (dashboard.metadata.range === "month_range") {
     renderWeeklyChart(dashboard.series);
   }
 }

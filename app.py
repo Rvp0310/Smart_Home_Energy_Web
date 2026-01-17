@@ -15,16 +15,16 @@ model = tf.keras.models.load_model("./models/FinalModel.keras", custom_objects={
 
 df = pd.read_csv("./database/sample.csv")
 
-PRED_RANGE_TO_STEPS = {
-    "24h_hourly": (24 * 4),
-    "7d_daily": (7 * 24 * 4),
-    "30d_monthly": (30 * 24 * 4)
+RANGE_TO_STEPS = {
+    "day_range": (24 * 4),
+    "week_range": (7 * 24 * 4),
+    "month_range": (30 * 24 * 4)
 }
 
 AGG_MAP = {
-    "24h_hourly": ["hourly"],
-    "7d_daily": ["daily"],
-    "30d_monthly": ["daily", "weekly"]
+    "day_range": ["hourly"],
+    "week_range": ["daily"],
+    "month_range": ["daily", "weekly"]
 }
 
 app = Flask(__name__)
@@ -42,7 +42,7 @@ def login():
         print(f"Logged in with Home ID: {home_id}")
         session['home_id'] = int(home_id)  
         session['logged_in'] = True
-    return render_template('main.html')
+    return render_template('hist.html')
 
 @app.route('/main')
 def main():
@@ -56,7 +56,7 @@ def forecast():
         
         print(f"Device: {device_types}, Range: {pred_range}")
 
-        n_steps = PRED_RANGE_TO_STEPS[pred_range]
+        n_steps = RANGE_TO_STEPS[pred_range]
         
         X = make_input_seq(df, home_id=session['home_id'], device_types=device_types,
         n_steps=n_steps)
@@ -87,12 +87,6 @@ def forecast():
 
         total_energy = sum(per_device_totals.values())
 
-        print()
-        print()
-        print(per_device_totals)
-        print()
-        print()
-
         dashboard = {
             "metadata": {
                 "devices": device_types,
@@ -105,9 +99,88 @@ def forecast():
             "series": series,
             "smartTip": generate_smart_tip(per_device_totals)
         }
-
+        print(series)
         return render_template("main.html", dashboard=dashboard)
+    return render_template("main.html", dashboard=None)
 
+@app.route('/history-dashboard', methods=['GET', 'POST'])
+def hist_dash():
+    if request.method == 'POST':
+        hist_range = request.form['history_range']
+        n_steps = RANGE_TO_STEPS[hist_range]
+        agg_modes = AGG_MAP[hist_range]
+
+        home_id = session['home_id']
+
+        df_hist = df[df['home_id'] == home_id].tail((n_steps * 5)).copy()
+        df_hist["timestamp"] = pd.to_datetime(df_hist["timestamp"])
+        series = {}
+
+        for device, dfd in df_hist.groupby("device_type"):
+            dfd= dfd.set_index("timestamp")
+            series[device] = {}
+
+            if "hourly" in agg_modes:
+                hourly = (
+                    dfd["energy_kWh"]
+                    .resample("1H")
+                    .sum()
+                    .tail(24)
+                    .tolist()
+                )
+                series[device]["hourly"] = hourly
+
+            if "daily" in agg_modes:
+                daily = (
+                    dfd["energy_kWh"]
+                    .resample("1D")
+                    .sum()
+                    .tail(7 if hist_range == "week_range" else 30)
+                    .tolist()
+                )
+                series[device]["daily"] = daily
+
+            if "weekly" in agg_modes:
+                weekly = (
+                    dfd["energy_kWh"]
+                    .resample("1W")
+                    .sum()
+                    .tail(4)
+                    .tolist()
+                )
+                series[device]["weekly"] = weekly
+
+        total_energy = df_hist["energy_kWh"].sum()
+        peak = df_hist.groupby("timestamp")["energy_kWh"].sum().max()
+        per_device = (
+            df_hist
+            .groupby("device_type")["energy_kWh"]
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        top_devices = per_device.head(3)
+        pie_data = per_device
+
+        dashboard = {
+            "metadata": {
+                "range": hist_range,
+                "points": n_steps
+            },
+            "kpis": {
+                "total_energy": round(total_energy, 2),
+                "peak": round(peak, 2)
+            },
+            "series": series,
+            "devices": {
+                "pie": pie_data.to_dict(),
+                "top": top_devices.to_dict()
+            }
+        }
+
+        print(dashboard)
+        return render_template('hist.html', dashboard=dashboard)
+    return render_template('hist.html', dashboard=None)
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -103,3 +103,10 @@ body{
     height: 500px;
     width: 90%;
 }
+
+hr{
+    height: 2px;
+    width: 80%;
+    background-color: var(--lilac);
+    margin-top: 20px;
+}
