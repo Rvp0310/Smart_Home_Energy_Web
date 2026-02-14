@@ -32,12 +32,10 @@ ENV/
 # --------------------
 # Data Files
 # --------------------
-*.csv
 *.tsv
 *.parquet
 *.json
-database/
-data/
+
 
 # --------------------
 # Logs

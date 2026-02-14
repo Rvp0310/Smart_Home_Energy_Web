@@ -114,5 +114,3 @@ function renderDashboard(dashboard) {
     renderWeeklyChart(dashboard.series);
   }
 }
-
-renderDashboard(dashboard);

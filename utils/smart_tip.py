@@ -24,7 +24,8 @@ SMART_TIPS = {
     "overall_high": {
         "title": "High Energy Consumption",
         "messages": [
-            "Overall energy usage is high for the selected duration. Energy-heavy devices dominate the load."
+            "Your overall energy footprint is higher than average. Reducing simultaneous appliance usage can improve efficiency.",
+            "Energy demand is elevated. Optimizing daily habits can lower both cost and environmental impact."
         ]
     },
     "efficient": {
