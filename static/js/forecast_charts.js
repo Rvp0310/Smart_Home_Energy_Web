@@ -111,6 +111,14 @@ function renderDashboard(dashboard) {
   renderLineChart(dashboard.series, dashboard.metadata.range, "lineChartDaily");
 
   if (dashboard.metadata.range === "month_range") {
+    let weeklyContainer = document.getElementById("weeklyChart");
+    if (!weeklyContainer) {
+        weeklyContainer = document.createElement("div");
+        weeklyContainer.id = "weeklyChart";
+        weeklyContainer.style.height = "400px";
+        weeklyContainer.style.width = "100%";
+        document.querySelector(".chart-space").appendChild(weeklyContainer);
+    }
     renderWeeklyChart(dashboard.series);
   }
 }
