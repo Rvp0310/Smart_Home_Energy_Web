@@ -13,6 +13,9 @@ load_dotenv()
 
 model = tf.keras.models.load_model("./models/FinalModel.keras", custom_objects={"asymmetric_huber": asymmetric_huber}
 )
+print("Model loaded successfully")
+print("Model summary:")
+model.summary()
 
 df = pd.read_csv("./database/sample.csv")
 
@@ -64,7 +67,6 @@ def forecast():
         print("input sequence: ", X)
 
         y_pred = model.predict(X).flatten()
-        print("predictions: ", y_pred)
 
         pred_by_device = {}
 
