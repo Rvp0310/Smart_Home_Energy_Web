@@ -18,6 +18,10 @@ print("Model summary:")
 model.summary()
 
 df = pd.read_csv("./database/sample.csv")
+print("Total rows:", len(df))
+print("Rows per device:")
+print(df.groupby('device_type').size())
+
 
 RANGE_TO_STEPS = {
     "day_range": (24 * 4),
