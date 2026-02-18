@@ -12,6 +12,10 @@ def make_input_seq(df, home_id, device_types, n_steps):
         
         # get temporal feature from timestamps
         temporal_feat = generate_temporal_features(new_timestamps)
+        print("Temporal feature head:")
+        print(temporal_feat.head(50))
+        print("Temporal feature tail:")
+        print(temporal_feat.tail(50))
 
         # get categorical feature values corresponding to given device
         past_rows_categorical = get_past_category(df, home_id, device_type, n_steps)
