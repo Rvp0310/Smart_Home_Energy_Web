@@ -52,5 +52,6 @@ def preprocess(df):
     df_preprocessed = pd.concat([df_other.reset_index(drop=True), df_encoded, df_scaled], axis=1)
 
     df_preprocessed = df_preprocessed[feature_order]
+    df_preprocessed = df_preprocessed.fillna(0)
 
     return df_preprocessed
