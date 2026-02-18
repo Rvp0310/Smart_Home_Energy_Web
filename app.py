@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, session
+import numpy as np
 import pandas as pd
 import tensorflow as tf
 import os
@@ -68,10 +69,14 @@ def forecast():
         
         X = make_input_seq(df, home_id=session['home_id'], device_types=device_types,
         n_steps=n_steps)
-        print("input sequence: ", X)
+        # print("input sequence: ", X)
 
-        y_pred = model.predict(X).flatten()
+        y_pred = model.predict(X)
+        for i in range(len(y_pred)):
+            if np.isnan(y_pred[i]).any():
+                print("NaN prediction batch:", i)
 
+        y_pred = y_pred.flatten()
         pred_by_device = {}
 
         idx = 0
@@ -88,7 +93,7 @@ def forecast():
             for mode in agg_modes:
                 series[device][mode] = aggregate_predictions(preds, mode).tolist()
 
-        print("predictions by device:\n", pred_by_device)
+        # print("predictions by device:\n", pred_by_device)
 
         per_device_totals = {
             device: sum(preds)
