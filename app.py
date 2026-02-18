@@ -61,8 +61,10 @@ def forecast():
         
         X = make_input_seq(df, home_id=session['home_id'], device_types=device_types,
         n_steps=n_steps)
+        print(X)
 
         y_pred = model.predict(X).flatten()
+        print(y_pred)
 
         pred_by_device = {}
 
@@ -80,6 +82,7 @@ def forecast():
             for mode in agg_modes:
                 series[device][mode] = aggregate_predictions(preds, mode).tolist()
 
+        print(pred_by_device)
 
         per_device_totals = {
             device: sum(preds)
